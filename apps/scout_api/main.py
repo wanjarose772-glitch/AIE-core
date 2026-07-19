@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+from packages.hawk.hawk import discover_new_tokens
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -44,3 +47,6 @@ def radar():
 @app.get("/compare")
 def compare():
     return compare_snapshots()
+@app.get("/hawk")
+def hawk():
+    return discover_new_tokens()
