@@ -9,13 +9,17 @@ from packages.config.settings import (
 
 def calculate_alpha_score(token):
     """
-    Calculate an Alpha Score using normalized market data.
+    Calculate Alpha Score.
+    Missing values automatically become 0.
     """
 
     score = 0
 
-    # Liquidity (30 points)
-    liquidity = token.get("liquidity", 0)
+    # ----------------------
+    # Liquidity
+    # ----------------------
+
+    liquidity = token.get("liquidity") or 0
 
     if liquidity >= HIGH_LIQUIDITY:
         score += 30
@@ -24,8 +28,11 @@ def calculate_alpha_score(token):
     elif liquidity >= 25_000:
         score += 10
 
-    # Volume (25 points)
-    volume = token.get("volume", 0)
+    # ----------------------
+    # Volume
+    # ----------------------
+
+    volume = token.get("volume") or 0
 
     if volume >= HIGH_VOLUME:
         score += 25
@@ -34,15 +41,21 @@ def calculate_alpha_score(token):
     elif volume >= 10_000:
         score += 8
 
-    # Market Cap (25 points)
-    market_cap = token.get("market_cap", 0)
+    # ----------------------
+    # Market Cap
+    # ----------------------
+
+    market_cap = token.get("market_cap") or 0
 
     if 100_000 <= market_cap <= 5_000_000:
         score += 25
     elif market_cap <= 20_000_000:
         score += 15
 
-    # Trusted DEX (20 points)
+    # ----------------------
+    # Trusted Source
+    # ----------------------
+
     if token.get("source") == "Birdeye":
         score += 20
     elif token.get("dex") in TRUSTED_DEXES:

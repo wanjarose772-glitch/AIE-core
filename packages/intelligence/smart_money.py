@@ -1,44 +1,40 @@
-SMART_WALLETS = {
+"""
+Legacy Smart Money compatibility layer.
 
-    "PEPE": 18,
-    "BONK": 11,
-    "DOG": 6,
-    "W26": 2,
-    "HOOD": 1,
-    "MET": 5
+The old Smart Money engine depended on Birdeye metrics like:
 
-}
+- unique_wallet_1h
+- buy_1h
+- sell_1h
+
+The new engine uses Wallet Intelligence instead.
+"""
 
 
-def get_smart_wallet_count(token):
+def calculate_smart_money(data):
+    """
+    Compatibility function.
 
-    return SMART_WALLETS.get(
-        token["ticker"],
-        0
-    )
-def calculate_smart_money_score(token):
+    If wallet intelligence already calculated a score,
+    return it.
 
-    wallets = get_smart_wallet_count(token)
+    Otherwise return 0.
+    """
+    return data.get("wallet_score", 0)
 
-    if wallets >= 15:
-        return 30
 
-    if wallets >= 10:
-        return 20
+def smart_money_label(score):
 
-    if wallets >= 5:
-        return 10
-
-    return 0
-def smart_money_rating(score):
-
-    if score >= 30:
+    if score >= 80:
         return "🐋 Heavy Accumulation"
 
+    if score >= 60:
+        return "🟢 Strong Buying"
+
+    if score >= 40:
+        return "🟡 Moderate Interest"
+
     if score >= 20:
-        return "🐬 Accumulating"
+        return "⚪ Weak"
 
-    if score >= 10:
-        return "👀 Early Interest"
-
-    return "None"
+    return "🔴 None"

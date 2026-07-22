@@ -2,37 +2,46 @@ def analyze_metadata(token):
 
     score = 0
 
-    info = token.get("info", {})
-
-    websites = info.get("websites", [])
-    socials = info.get("socials", [])
-
     metadata = {
         "website": False,
         "twitter": False,
         "telegram": False,
-        "discord": False
+        "discord": False,
     }
 
-    if websites:
+    extensions = token.get("extensions", {})
+
+    # -----------------------
+    # Website
+    # -----------------------
+
+    if extensions.get("website"):
         metadata["website"] = True
         score += 20
 
-    for social in socials:
+    # -----------------------
+    # Twitter / X
+    # -----------------------
 
-        social_type = social.get("type", "").lower()
+    if extensions.get("twitter"):
+        metadata["twitter"] = True
+        score += 20
 
-        if social_type == "twitter":
-            metadata["twitter"] = True
-            score += 20
+    # -----------------------
+    # Telegram
+    # -----------------------
 
-        elif social_type == "telegram":
-            metadata["telegram"] = True
-            score += 20
+    if extensions.get("telegram"):
+        metadata["telegram"] = True
+        score += 20
 
-        elif social_type == "discord":
-            metadata["discord"] = True
-            score += 20
+    # -----------------------
+    # Discord
+    # -----------------------
+
+    if extensions.get("discord"):
+        metadata["discord"] = True
+        score += 20
 
     metadata["community_score"] = score
 

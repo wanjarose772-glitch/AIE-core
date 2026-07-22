@@ -1,51 +1,124 @@
-from packages.source_manager.manager import collect_market_data
+print("RUNNING REPORT.PY")
+print(__file__)
 
-from packages.normalizers.market import normalize_pair
-from packages.normalizers.birdeye import normalize_birdeye_token
+from packages.data_sources.birdeye import (
+    get_trending_tokens,
+    get_token_overview,
+)
 
-from packages.filters.quality import is_candidate
+from packages.data_sources.birdeye_transactions import (
+    get_token_transactions,
+)
 
-from packages.intelligence.analyzer import analyze_token
+from packages.wallet_intelligence.collector import (
+    collect_wallet_data,
+)
 
-from packages.history.storage import save_snapshot
+from packages.intelligence.analyzer import (
+    analyze_token,
+)
+
+from packages.cache.cache_manager import (
+    save_cache,
+    load_cache,
+)
+
+from packages.config.settings import (
+    EXCLUDED_TICKERS,
+)
 
 
 def build_intelligence_report():
-    """
-    Build the complete intelligence report.
-    """
 
-    market = collect_market_data()
+    # -----------------------------------
+    # Cache
+    # -----------------------------------
+
+    cached = load_cache()
+
+    if cached:
+        print("Using cached intelligence report...")
+        return cached
 
     report = []
 
-    for item in market:
+    tokens = get_trending_tokens()
 
-        # Normalize according to source
-        if "baseToken" in item:
-            token = normalize_pair(item)
-        else:
-            token = normalize_birdeye_token(item)
+    if not tokens:
+        return []
 
-        # Skip low-quality tokens
-        if not is_candidate(token):
+    # -----------------------------------
+    # Scan tokens
+    # -----------------------------------
+
+    for item in tokens:
+
+        token = {
+            "ticker": item.get("symbol"),
+            "name": item.get("name"),
+            "chain": "solana",
+            "price": item.get("price"),
+            "liquidity": item.get("liquidity"),
+            "volume": item.get("volume24hUSD"),
+            "market_cap": item.get("mc"),
+            "address": item.get("address"),
+            "source": "Birdeye",
+        }
+
+        # -----------------------------------
+        # Skip major coins
+        # -----------------------------------
+
+        if token["ticker"] in EXCLUDED_TICKERS:
+            print(f"Skipping {token['ticker']}")
             continue
 
-        # Run the intelligence pipeline
-        token = analyze_token(token, item)
+        print(f"\nAnalyzing {token['ticker']}")
+
+        # -----------------------------------
+        # Metadata
+        # -----------------------------------
+
+        metadata = get_token_overview(
+            token["address"]
+        )
+
+        # -----------------------------------
+        # Transactions
+        # -----------------------------------
+
+        transaction_data = get_token_transactions(
+            token["address"]
+        )
+
+        if transaction_data is None:
+            print("No transaction data.")
+            continue
+
+        # -----------------------------------
+        # Wallet Intelligence
+        # -----------------------------------
+
+        wallet_data = collect_wallet_data(
+            token["address"]
+        )
+
+        token = analyze_token(
+            token,
+            metadata,
+            transaction_data,
+            wallet_data,
+        )
 
         report.append(token)
 
-    # Sort by Alpha Score
-    report.sort(
-        key=lambda x: x["alpha_score"],
-        reverse=True
-    )
+        # -----------------------------------
+        # Development Limit
+        # -----------------------------------
 
-    # Keep only the best opportunities
-    report = report[:20]
+        if len(report) >= 10:
+            break
 
-    # Save snapshot
-    save_snapshot(report)
+    save_cache(report)
 
     return report

@@ -1,159 +1,153 @@
-# ASILI Intelligence Engine (AIE)
+# 🦅 ASILI HAWK
 
-## Overview
+ASILI HAWK is an AI-powered on-chain intelligence engine designed to discover early cryptocurrency opportunities before they become mainstream.
 
-The ASILI Intelligence Engine (AIE) is a modular AI-powered cryptocurrency intelligence platform designed to identify high-potential tokens before they become mainstream.
-
-Rather than simply displaying market data, AIE collects, filters, analyzes, scores, and tracks crypto assets across multiple data sources to produce actionable intelligence.
+Instead of relying on hype, HAWK combines multiple data sources, wallet intelligence, liquidity analysis, smart money signals, and scoring algorithms to identify high-probability opportunities.
 
 ---
 
 # Current Features
 
-## Market Data Collection
+## Discovery
 
-- DexScreener Integration
-- Birdeye Integration
-- Multi-source aggregation
+- DexScreener Pair Discovery
+- Live Pair Scanner
+- Birdeye Trending Tokens
 
-## Data Processing
+## Intelligence
 
-- Token Normalization
-- Quality Filtering
-- Metadata Analysis
-- Community Detection
-
-## Intelligence Engines
-
-- Alpha Score Engine
-- Confidence Engine
-- Narrative Detection
+- Wallet Profiling
+- Whale Detection Framework
 - Smart Money Analysis
-- Social Signal Analysis
+- Metadata Analysis
+- Narrative Scoring
+- Social Signal Scoring
+- Confidence Engine
 
-## APIs
+## Decision Engine
 
-- `/health`
-- `/intel`
-- `/radar`
+- Alpha Score
+- Buy / Watch / Avoid Recommendation
+- Token Ranking
 
-## Historical Intelligence
+## Infrastructure
 
-- Snapshot Storage
-- Historical Memory
+- FastAPI Backend
+- Modular Architecture
+- Cache System
+- Test Suite
 
 ---
 
 # Project Structure
 
 ```
-AIE-core
-│
-├── apps/
-│   └── scout_api/
-│
-├── packages/
-│   ├── config/
-│   ├── filters/
-│   ├── history/
-│   ├── inspector/
-│   ├── intelligence/
-│   ├── normalizers/
-│   ├── radar/
-│   ├── score_engine/
-│   └── source_manager/
-│
-├── snapshots/
-├── tests/
-├── README.md
-└── requirements.txt
+AIE-core/
+
+apps/
+frontend/
+packages/
+
+    cache/
+    config/
+    data_sources/
+    discovery/
+    intelligence/
+    wallet_intelligence/
+    score_engine/
+
+tests/
+
+README.md
+requirements.txt
 ```
 
 ---
 
-# Intelligence Pipeline
+# Installation
 
+Clone the repository
+
+```bash
+git clone <repository-url>
 ```
-Market Sources
-        │
-        ▼
- Source Manager
-        │
-        ▼
- Normalization
-        │
-        ▼
- Quality Filters
-        │
-        ▼
- Metadata Analysis
-        │
-        ▼
- Alpha Score
-        │
-        ▼
- Narrative Engine
-        │
-        ▼
- Smart Money Engine
-        │
-        ▼
- Social Signals
-        │
-        ▼
- Confidence Engine
-        │
-        ▼
- Recommendation Engine
-        │
-        ▼
- Intelligence Report
-        │
-   ┌────┴────┐
-   ▼         ▼
- /intel    /radar
-        │
-        ▼
- Historical Snapshots
+
+Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+Activate it
+
+Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
 ```
 
 ---
 
-# Current Development Stage
+# Environment Variables
 
-**Version:** Sprint 10.1
+Create a `.env`
 
-Completed:
-
-- ✅ Multi-source market collection
-- ✅ Normalization
-- ✅ Quality filtering
-- ✅ Alpha scoring
-- ✅ Confidence engine
-- ✅ Narrative engine
-- ✅ Smart money engine
-- ✅ Social signals
-- ✅ Metadata analyzer
-- ✅ Intelligence API
-- ✅ Radar API
-- ✅ Historical snapshots
+```
+BIRDEYE_API_KEY=YOUR_KEY
+HELIUS_API_KEY=YOUR_KEY
+```
 
 ---
 
-# Upcoming Features
+# Current Status
 
-- Historical comparison engine
-- Momentum scoring
-- Liquidity surge detection
-- Volume explosion alerts
-- Whale accumulation alerts
-- Pattern recognition
-- AI market summaries
-- Portfolio tracking
-- Telegram and Discord alerts
+Current Version
+
+```
+v0.2-alpha
+```
+
+Working
+
+- Birdeye Integration
+- DexScreener Integration
+- Live Pair Discovery
+- Helius Authentication
+- Wallet Intelligence Framework
+- Alpha Score Engine
+- Recommendation Engine
+
+In Progress
+
+- Discovery Engine V2
+- Early Token Filters
+- Smart Wallet Tracking
+- Liquidity Lock Detection
+- Holder Distribution Analysis
+
+Planned
+
+- Telegram Alerts
+- Discord Alerts
+- Portfolio Tracking
+- AI Narrative Detection
+- Auto Radar
+- Web Dashboard
 
 ---
 
 # Vision
 
-The long-term vision of AIE is to become an institutional-grade crypto intelligence platform capable of detecting emerging market opportunities through real-time analysis, historical comparison, and AI-assisted decision support.
+The goal of ASILI HAWK is simple:
+
+> Find tomorrow's winning tokens before the market does.
+
+---
+
+Built with ❤️ by ASILI Group.
