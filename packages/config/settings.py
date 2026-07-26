@@ -3,6 +3,14 @@ ASILI Intelligence Engine
 Global Configuration
 """
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+HELIUS_API_KEY = os.getenv("HELIUS_API_KEY")
+BIRDEYE_API_KEY = os.getenv("BIRDEYE_API_KEY")
+
 
 # ==========================
 # Market Filters

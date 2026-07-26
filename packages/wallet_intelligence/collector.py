@@ -1,57 +1,61 @@
-import os
+"""
+Wallet Collector
+"""
+
 import httpx
-from dotenv import load_dotenv
 
-load_dotenv()
+from packages.config.settings import HELIUS_API_KEY
 
-HELIUS_API_KEY = os.getenv("HELIUS_API_KEY")
+HELIUS_URL = f"https://mainnet.helius-rpc.com/?api-key={HELIUS_API_KEY}"
 
-URL = f"https://mainnet.helius-rpc.com/?api-key={HELIUS_API_KEY}"
+
+def get_token_wallets(token_address: str, limit: int = 25):
+
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getTokenLargestAccounts",
+        "params": [
+            token_address
+        ]
+    }
+
+    response = httpx.post(
+        HELIUS_URL,
+        json=payload,
+        timeout=20
+    )
+
+    data = response.json()
+
+    wallets = []
+
+    if "result" in data:
+
+        for account in data["result"]["value"][:limit]:
+
+            wallets.append({
+                "address": account["address"],
+                "amount": account.get("uiAmount", 0) or 0
+            })
+
+    return wallets
+
+
+# --------------------------------------------------------
+# Compatibility wrapper
+# --------------------------------------------------------
+
+def collect_wallet_data(token_address):
+    """
+    Temporary wrapper so existing code keeps working.
+    """
+
+    from packages.wallet_intelligence.profiler import profile_wallets
 
 
 def collect_wallet_data(token_address):
 
-    print("=" * 60)
-    print("HELIUS COLLECTOR RUNNING")
-    print("TOKEN:", token_address)
-    print("=" * 60)
+    wallets = get_token_wallets(token_address)
 
-    payload = {
-        "jsonrpc": "2.0",
-        "id": "holders",
-        "method": "getTokenLargestAccounts",
-        "params": [token_address],
-    }
-
-    try:
-
-        response = httpx.post(
-            URL,
-            json=payload,
-            timeout=20,
-        )
-
-        print("Helius Status:", response.status_code)
-
-        data = response.json()
-
-        if "result" not in data:
-            print("Helius returned no result.")
-            print(data)
-            return None
-
-        holders = data["result"]["value"]
-
-        print("Largest wallets:", len(holders))
-
-        return {
-            "holder": len(holders),
-            "largest_wallets": holders,
-        }
-
-    except Exception as e:
-
-        print("HELIUS ERROR")
-        print(e)
-
-        return None
+    return profile_wallets(wallets)

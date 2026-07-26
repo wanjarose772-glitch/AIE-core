@@ -1,3 +1,4 @@
+from packages.database import token
 from packages.wallet_intelligence.smart_wallets import (
     analyze_wallets,
 )
@@ -75,6 +76,9 @@ def analyze_token(
         token
     )
 
+    from packages.intelligence.confidence import calculate_confidence
+
+    token["confidence"] = calculate_confidence(token)
     # ----------------------------
     # Narrative
     # ----------------------------

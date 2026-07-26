@@ -1,53 +1,37 @@
-from packages.wallet_intelligence.profiler import build_wallet_profile
+"""
+Smart Wallet Detector
+"""
+
+from packages.wallet_intelligence.wallet_database import get_wallet
 
 
-def analyze_wallets(wallet_data):
+def detect_smart_wallets(wallet_addresses):
 
-    if not wallet_data:
+    smart_wallets = []
 
-        return {
-            "wallet_score": 0,
-            "whales": 0,
-            "wallet_rating": "Unknown"
-        }
+    confidence_bonus = 0
 
-    profile = build_wallet_profile(wallet_data)
+    for address in wallet_addresses:
 
-    score = 0
+        wallet = get_wallet(address)
 
-    # Holder count
-    if profile["holders"] > 1000:
-        score += 20
+        if wallet.grade == "A+":
 
-    # Number of large wallets
-    if profile["largest_wallets"] >= 10:
-        score += 30
+            smart_wallets.append(wallet)
+            confidence_bonus += 20
 
-    # Whale wallets
-    if profile["whale_wallets"] >= 3:
-        score += 30
+        elif wallet.grade == "A":
 
-    # Whale supply
-    if profile["whale_supply"] > 0:
-        score += 20
+            smart_wallets.append(wallet)
+            confidence_bonus += 15
 
-    if score >= 80:
-        rating = "Institutional"
+        elif wallet.grade == "B":
 
-    elif score >= 60:
-        rating = "Accumulation"
-
-    elif score >= 40:
-        rating = "Watching"
-
-    else:
-        rating = "Weak"
+            smart_wallets.append(wallet)
+            confidence_bonus += 10
 
     return {
-
-        "wallet_score": score,
-
-        "whales": profile["whale_wallets"],
-
-        "wallet_rating": rating
+        "count": len(smart_wallets),
+        "wallets": smart_wallets,
+        "confidence_bonus": confidence_bonus
     }

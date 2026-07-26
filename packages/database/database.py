@@ -1,17 +1,33 @@
-from dotenv import load_dotenv
-import os
+"""
+AIE Memory Database
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+Stores previous token scans so AIE can compare
+future scans against historical data.
+"""
 
-load_dotenv()
+database = {}
 
-DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL)
+def save_token(token: dict):
 
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+    database[token["address"]] = token
+
+
+def get_token(address: str):
+
+    return database.get(address)
+
+
+def token_exists(address: str):
+
+    return address in database
+
+
+def all_tokens():
+
+    return list(database.values())
+
+
+def clear():
+
+    database.clear()

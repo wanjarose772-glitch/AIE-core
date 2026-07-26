@@ -1,39 +1,25 @@
-def build_wallet_profile(data):
+"""
+Wallet Profiler
+"""
 
-    holders = data.get("holder", 0)
+from packages.wallet_intelligence.wallet_database import (
+    get_wallet,
+    save_wallet,
+)
 
-    largest_wallets = data.get("largest_wallets", [])
+from packages.wallet_intelligence.wallet_scores import (
+    calculate_wallet_score,
+)
 
-    whale_wallets = 0
 
-    whale_supply = 0
+def profile_wallet(address: str):
 
-    for wallet in largest_wallets:
+    wallet = get_wallet(address)
 
-        amount = float(wallet.get("uiAmount", 0))
+    wallet.times_seen += 1
 
-        if amount >= 100000:
-            whale_wallets += 1
+    calculate_wallet_score(wallet)
 
-        whale_supply += amount
+    save_wallet(wallet)
 
-    return {
-
-        "holders": holders,
-
-        "largest_wallets": len(largest_wallets),
-
-        "whale_wallets": whale_wallets,
-
-        "whale_supply": whale_supply,
-
-        "wallet_growth": holders,
-
-        "buy_volume": whale_supply,
-
-        "sell_volume": 0,
-
-        "buy_trades": whale_wallets,
-
-        "sell_trades": 0,
-    }
+    return wallet

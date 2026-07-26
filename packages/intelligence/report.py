@@ -1,5 +1,14 @@
-print("RUNNING REPORT.PY")
-print(__file__)
+import os
+import httpx
+from dotenv import load_dotenv
+
+load_dotenv()
+
+HELIUS_API_KEY = os.getenv("HELIUS_API_KEY")
+
+HELIUS_URL = (
+    f"https://mainnet.helius-rpc.com/?api-key={HELIUS_API_KEY}"
+)
 
 from packages.data_sources.birdeye import (
     get_trending_tokens,
@@ -109,6 +118,11 @@ def build_intelligence_report():
             transaction_data,
             wallet_data,
         )
+        print(
+    f"{token['ticker']} | "
+    f"Alpha={token.get('alpha_score')} | "
+    f"Confidence={token.get('confidence')}%"
+)
 
         report.append(token)
 
