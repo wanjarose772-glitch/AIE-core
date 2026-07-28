@@ -1,3 +1,11 @@
+"""
+Discovery Aggregator
+
+Collects launches from all discovery sources,
+filters them, normalizes them,
+scores them and returns a ranked list.
+"""
+
 from packages.discovery.new_pairs import discover_new_pairs
 from packages.discovery.geckoterminal import discover_gecko_launches
 
@@ -32,24 +40,21 @@ def discover_all_launches():
     launches = filter_launches(launches)
 
     # ---------------------------------
-    # Discovery Score
+    # Normalize + Score
     # ---------------------------------
 
     normalized = []
 
-for token in launches:
+    for token in launches:
 
-    token = normalize_token(token)
+        token = normalize_token(token)
+        token = score_launch(token)
 
-    token = score_launch(token)
+        normalized.append(token)
 
-    normalized.append(token)
-
-    launches = normalized
-
-    launches.sort(
-        key=lambda token: token["discovery_score"],
+    normalized.sort(
+        key=lambda token: token.get("discovery_score", 0),
         reverse=True,
     )
 
-     return launches
+    return normalized
