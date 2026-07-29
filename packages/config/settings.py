@@ -87,3 +87,9 @@ EXCLUDED_TICKERS = [
     "WBTC",
     "WETH"
 ]
+print("=" * 60)
+print("CONFIG LOADED")
+print("Current directory:", os.getcwd())
+print("HELIUS:", "FOUND" if HELIUS_API_KEY else "MISSING")
+print("BIRDEYE:", "FOUND" if BIRDEYE_API_KEY else "MISSING")
+print("=" * 60)

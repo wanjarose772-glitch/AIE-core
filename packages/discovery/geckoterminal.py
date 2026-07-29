@@ -1,4 +1,5 @@
 import httpx
+import json
 
 GECKO_URL = (
     "https://api.geckoterminal.com/api/v2/networks/solana/new_pools"
@@ -14,18 +15,15 @@ def safe_float(value):
 
 def discover_gecko_launches():
 
-    print("=" * 60)
+    print("=" * 80)
     print("GECKOTERMINAL")
-    print("=" * 60)
+    print("=" * 80)
 
     try:
 
-        response = httpx.get(
-            GECKO_URL,
-            timeout=20,
-        )
+        response = httpx.get(GECKO_URL, timeout=20)
 
-        print(f"Status: {response.status_code}")
+        print("Status:", response.status_code)
 
         if response.status_code != 200:
             print(response.text)
@@ -36,74 +34,56 @@ def discover_gecko_launches():
         pools = payload.get("data", [])
         included = payload.get("included", [])
 
-        print(f"Pools Found: {len(pools)}")
-
-        # -----------------------------------
-        # Build lookup tables
-        # -----------------------------------
-
         token_lookup = {}
         dex_lookup = {}
 
         for item in included:
 
-            item_type = item.get("type")
-            item_id = item.get("id")
             attrs = item.get("attributes", {})
 
-            if item_type == "token":
-                token_lookup[item_id] = attrs
+            if item.get("type") == "token":
+                token_lookup[item["id"]] = attrs
 
-            elif item_type == "dex":
-                dex_lookup[item_id] = attrs
+            elif item.get("type") == "dex":
+                dex_lookup[item["id"]] = attrs
 
         launches = []
-
-        # -----------------------------------
-        # Parse every pool
-        # -----------------------------------
 
         for pool in pools:
 
             attrs = pool.get("attributes", {})
             rel = pool.get("relationships", {})
 
-            base = (
-                rel.get("base_token", {})
-                .get("data", {})
-            )
+            base = rel.get("base_token", {}).get("data", {})
+            dex = rel.get("dex", {}).get("data", {})
 
-            dex = (
-                rel.get("dex", {})
-                .get("data", {})
-            )
+            token = token_lookup.get(base.get("id"), {})
+            dex_data = dex_lookup.get(dex.get("id"), {})
 
-            token = token_lookup.get(
-                base.get("id"),
-                {}
-            )
+            # -------------------------
+            # FALLBACK USING POOL NAME
+            # -------------------------
 
-            dex_data = dex_lookup.get(
-                dex.get("id"),
-                {}
-            )
+            pool_name = attrs.get("name", "")
+
+            if "/" in pool_name:
+                fallback_symbol = pool_name.split("/")[0].strip()
+            else:
+                fallback_symbol = "UNKNOWN"
 
             symbol = (
                 token.get("symbol")
                 or token.get("token_symbol")
-                or token.get("name")
-                or "UNKNOWN"
+                or fallback_symbol
             )
 
             name = (
                 token.get("name")
-                or token.get("token_name")
-                or symbol
+                or fallback_symbol
             )
 
             address = (
                 token.get("address")
-                or token.get("token_address")
                 or base.get("id")
                 or ""
             )
@@ -113,9 +93,7 @@ def discover_gecko_launches():
                 "source": "GeckoTerminal",
 
                 "ticker": symbol,
-
                 "symbol": symbol,
-
                 "name": name,
 
                 "address": address,
@@ -132,6 +110,11 @@ def discover_gecko_launches():
                     (attrs.get("volume_usd") or {}).get("h24")
                 ),
 
+                "market_cap": safe_float(
+                    attrs.get("market_cap_usd")
+                    or attrs.get("fdv_usd")
+                ),
+
                 "created_at": attrs.get(
                     "pool_created_at"
                 ),
@@ -140,17 +123,17 @@ def discover_gecko_launches():
                     dex_data.get("identifier")
                     or dex.get("id")
                     or "unknown"
-                ),
+                )
 
             })
 
-        print(f"Parsed {len(launches)} launches.")
+        print(f"\nParsed {len(launches)} launches.\n")
 
         return launches
 
     except Exception as e:
 
-        print("GeckoTerminal Error")
+        print("\nGECKOTERMINAL ERROR")
         print(e)
 
         return []

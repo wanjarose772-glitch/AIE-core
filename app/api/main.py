@@ -28,6 +28,13 @@ def home():
         "version": "1.0.0",
     }
 
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "api": "online",
+        "version": "1.0.0",
+    }
 
 @app.get("/scan")
 def scan():

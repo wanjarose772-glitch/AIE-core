@@ -43,8 +43,8 @@ class MasterScoreEngine:
         # Wallet Intelligence
         # -------------------------
 
-        wallets = analysis.get("wallet_score", 0)
-        score += wallets * 0.10
+        wallet_score = analysis.get("wallet_score", 0)
+        score += wallet_score * 0.15
 
         # -------------------------
         # Whale Intelligence

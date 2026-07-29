@@ -13,7 +13,7 @@ HEADERS = {
 }
 
 
-def resolve_birdeye(address):
+def get_birdeye_metadata(address):
 
     try:
 
@@ -27,12 +27,15 @@ def resolve_birdeye(address):
         )
 
         if response.status_code != 200:
-            return None
+            return {}
 
-        data = response.json()
+        payload = response.json()
 
-        return data.get("data", {})
+        return payload.get("data", {})
 
-    except Exception:
+    except Exception as e:
 
-        return None
+        print("Birdeye Metadata Error")
+        print(e)
+
+        return {}

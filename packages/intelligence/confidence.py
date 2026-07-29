@@ -1,82 +1,49 @@
 """
-Confidence Engine
------------------
+AIE Confidence Engine
 
-Produces a confidence percentage (0-100)
-based on every signal collected by AIE.
+Combines every intelligence engine
+into one final AIE score.
 """
 
 
-def calculate_confidence(token: dict):
+def compute_confidence(token):
 
-    score = 0
+    discovery = token.get("discovery_score", 0)
+    wallet = token.get("wallet_score", 0)
+    whale = token.get("whale_score", 0)
+    momentum = token.get("momentum", 0)
+    opportunity = token.get("opportunity", 0)
+    trend = token.get("trend", 0)
+    risk = token.get("risk_score", 0)
 
-    # --------------------------
-    # Liquidity
-    # --------------------------
-
-    liquidity = token.get("liquidity", 0)
-
-    if liquidity >= 50000:
-        score += 20
-
-    elif liquidity >= 25000:
-        score += 15
-
-    elif liquidity >= 10000:
-        score += 10
-
-    # --------------------------
-    # Volume
-    # --------------------------
-
-    volume = token.get("volume", 0)
-
-    if volume >= 100000:
-        score += 20
-
-    elif volume >= 50000:
-        score += 15
-
-    elif volume >= 10000:
-        score += 10
-
-    # --------------------------
-    # Smart wallets
-    # --------------------------
-
-    smart_wallets = token.get("smart_wallets", 0)
-
-    score += min(smart_wallets * 4, 20)
-
-    # --------------------------
-    # Holder concentration
-    # --------------------------
-
-    concentration = token.get(
-        "top_holder_percent",
-        100
+    score = (
+        discovery * 0.25 +
+        wallet * 0.20 +
+        whale * 0.15 +
+        momentum * 0.15 +
+        opportunity * 0.15 +
+        trend * 0.10
     )
 
-    if concentration <= 10:
-        score += 20
+    score -= risk * 0.20
 
-    elif concentration <= 20:
-        score += 15
+    score = max(0, min(score, 100))
 
-    elif concentration <= 35:
-        score += 8
+    token["aie_score"] = round(score, 1)
 
-    # --------------------------
-    # Age
-    # --------------------------
+    if score >= 90:
+        token["recommendation"] = "STRONG BUY"
 
-    age = token.get("age_minutes", 0)
+    elif score >= 75:
+        token["recommendation"] = "BUY"
 
-    if 5 <= age <= 120:
-        score += 10
+    elif score >= 60:
+        token["recommendation"] = "WATCH"
 
-    elif age < 5:
-        score += 5
+    elif score >= 40:
+        token["recommendation"] = "SPECULATIVE"
 
-    return min(score, 100)
+    else:
+        token["recommendation"] = "PASS"
+
+    return token

@@ -1,25 +1,26 @@
 """
 Wallet Profiler
+
+Profiles wallets against the
+local smart wallet database.
 """
 
 from packages.wallet_intelligence.wallet_database import (
     get_wallet,
-    save_wallet,
-)
-
-from packages.wallet_intelligence.wallet_scores import (
-    calculate_wallet_score,
 )
 
 
-def profile_wallet(address: str):
+def profile_wallets(wallets):
 
-    wallet = get_wallet(address)
+    profiled = []
 
-    wallet.times_seen += 1
+    for item in wallets:
 
-    calculate_wallet_score(wallet)
+        wallet = get_wallet(item["address"])
 
-    save_wallet(wallet)
+        wallet.address = item["address"]
+        wallet.amount = item["amount"]
 
-    return wallet
+        profiled.append(wallet)
+
+    return profiled

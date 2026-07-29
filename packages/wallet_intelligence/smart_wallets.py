@@ -1,37 +1,35 @@
 """
-Smart Wallet Detector
+Smart Wallet Intelligence
 """
 
-from packages.wallet_intelligence.wallet_database import get_wallet
 
+def analyze_wallets(wallets):
 
-def detect_smart_wallets(wallet_addresses):
+    score = 0
 
-    smart_wallets = []
+    smart_wallets = 0
 
-    confidence_bonus = 0
+    for wallet in wallets:
 
-    for address in wallet_addresses:
+        grade = getattr(wallet, "grade", "C")
 
-        wallet = get_wallet(address)
+        if grade == "A+":
 
-        if wallet.grade == "A+":
+            smart_wallets += 1
+            score += 20
 
-            smart_wallets.append(wallet)
-            confidence_bonus += 20
+        elif grade == "A":
 
-        elif wallet.grade == "A":
+            smart_wallets += 1
+            score += 15
 
-            smart_wallets.append(wallet)
-            confidence_bonus += 15
+        elif grade == "B":
 
-        elif wallet.grade == "B":
-
-            smart_wallets.append(wallet)
-            confidence_bonus += 10
+            smart_wallets += 1
+            score += 10
 
     return {
-        "count": len(smart_wallets),
-        "wallets": smart_wallets,
-        "confidence_bonus": confidence_bonus
+        "wallet_score": min(score, 100),
+        "smart_wallets": smart_wallets,
+        "wallets": wallets,
     }
