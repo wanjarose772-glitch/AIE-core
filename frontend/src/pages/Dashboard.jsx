@@ -1,66 +1,46 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import api from "../services/api";
 
 export default function Dashboard() {
     const [hawk, setHawk] = useState([]);
-
-useEffect(() => {
-
-    async function loadHawk() {
-
-        try {
-
-            const response = await axios.get(
-                "http://127.0.0.1:8000/hawk"
-            );
-
-            setHawk(response.data);
-
-        } catch (err) {
-
-            console.log(err);
-
-        }
-
-    }
-
-    loadHawk();
-
-}, []);
-
     const [intel, setIntel] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
 
-        loadIntel();
+        let active = true;
 
-        const timer = setInterval(loadIntel, 30000);
+        async function refreshDashboard() {
+            try {
+                const [intelResponse, hawkResponse] = await Promise.all([
+                    api.get("/intel"),
+                    api.get("/hawk"),
+                ]);
 
-        return () => clearInterval(timer);
+                if (!active) return;
+                setIntel(Array.isArray(intelResponse.data) ? intelResponse.data : []);
+                setHawk(Array.isArray(hawkResponse.data) ? hawkResponse.data : []);
+                setError("");
+            } catch (err) {
+                if (active) {
+                    setError("Live data is temporarily unavailable. Retrying automatically.");
+                }
+                console.error("Dashboard refresh failed", err);
+            } finally {
+                if (active) setLoading(false);
+            }
+        }
+
+        refreshDashboard();
+        const timer = setInterval(refreshDashboard, 30000);
+
+        return () => {
+            active = false;
+            clearInterval(timer);
+        };
 
     }, []);
-
-    async function loadIntel() {
-
-        try {
-
-            const response = await api.get("/intel");
-
-            setIntel(response.data);
-
-            setLoading(false);
-
-        }
-
-        catch (err) {
-
-            console.error(err);
-
-        }
-
-    }
 
     if (loading) {
 
@@ -76,11 +56,30 @@ useEffect(() => {
 
     }
 
-    const top = intel[0];
+    // The new-launch scanner is the primary source for early opportunities.
+    // The deeper intelligence report augments it when available, but an empty
+    // report must never hide valid live-launch candidates.
+    const candidates = hawk.length > 0 ? hawk : intel;
+    const rankedCandidates = [...candidates].sort(
+        (left, right) => (right.alpha_score ?? 0) - (left.alpha_score ?? 0)
+    );
+    const top = rankedCandidates[0] ?? {
+        ticker: "No live opportunities yet",
+        name: "AIE is waiting for the next qualifying launch.",
+        price: "—",
+        alpha_score: 0,
+        confidence: 0,
+        recommendation: "WATCH",
+    };
 
     return (
 
         <main className="flex-1 bg-slate-950 text-white p-8">
+            {error && (
+                <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-amber-200">
+                    {error}
+                </div>
+            )}
             <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl border border-slate-700 p-6 mb-8">
 
     <h2 className="text-3xl font-bold">
@@ -307,7 +306,7 @@ useEffect(() => {
 
                     <h1 className="text-6xl mt-10">
 
-                        {intel.length}
+                        {rankedCandidates.length}
 
                     </h1>
 
@@ -405,7 +404,7 @@ useEffect(() => {
 
                     <tbody>
 
-                        {intel.map((coin) => (
+                        {rankedCandidates.map((coin) => (
 
                             <tr
     key={coin.address}
@@ -442,14 +441,16 @@ useEffect(() => {
 
     <span
         className={
-            coin.recommendation.toLowerCase().includes("buy")
+            (coin.recommendation ?? coin.rating ?? "").toLowerCase().includes("prime") ||
+            (coin.recommendation ?? coin.rating ?? "").toLowerCase().includes("buy")
                 ? "bg-green-600 text-white px-3 py-1 rounded-full"
-                : coin.recommendation.toLowerCase().includes("watch")
+                : (coin.recommendation ?? coin.rating ?? "").toLowerCase().includes("watch") ||
+                  (coin.recommendation ?? coin.rating ?? "").toLowerCase().includes("speculative")
                 ? "bg-yellow-500 text-black px-3 py-1 rounded-full"
                 : "bg-red-600 text-white px-3 py-1 rounded-full"
         }
     >
-        {coin.recommendation}
+        {coin.recommendation ?? coin.rating ?? "WATCH"}
     </span>
 
 </td>

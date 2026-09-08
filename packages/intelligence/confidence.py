@@ -8,24 +8,17 @@ into one final AIE score.
 
 def compute_confidence(token):
 
-    discovery = token.get("discovery_score", 0)
-    wallet = token.get("wallet_score", 0)
-    whale = token.get("whale_score", 0)
-    momentum = token.get("momentum", 0)
-    opportunity = token.get("opportunity", 0)
-    trend = token.get("trend", 0)
-    risk = token.get("risk_score", 0)
-
-    score = (
-        discovery * 0.25 +
-        wallet * 0.20 +
-        whale * 0.15 +
-        momentum * 0.15 +
-        opportunity * 0.15 +
-        trend * 0.10
-    )
-
-    score -= risk * 0.20
+    # Missing enrichment is unknown, not a failed signal.  Average only the
+    # scores the current pipeline actually produced.
+    signals = [
+        token.get("alpha_score"), token.get("discovery_score"),
+        token.get("wallet_score"), token.get("whale_score"),
+        token.get("momentum"), token.get("opportunity"),
+        token.get("trend"), token.get("social_score"),
+    ]
+    available = [float(signal) for signal in signals if signal is not None]
+    score = sum(available) / len(available) if available else 0
+    score -= float(token.get("risk_score") or 0) * 0.20
 
     score = max(0, min(score, 100))
 

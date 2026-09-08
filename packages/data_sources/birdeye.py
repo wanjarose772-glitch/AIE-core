@@ -24,9 +24,6 @@ def get_trending_tokens():
     print("\n===== BIRDEYE DEBUG =====")
     print("API KEY FOUND:", API_KEY is not None)
 
-    if API_KEY:
-        print("FIRST 8 CHARS:", API_KEY[:8])
-
     try:
 
         response = httpx.get(

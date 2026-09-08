@@ -87,6 +87,11 @@ def calculate_alpha(token):
     if liquidity > volume and liquidity > 10000:
         score += 5
 
+    # Sustained activity is more meaningful when it is supported by adequate
+    # liquidity rather than a thin, easily manipulated pool.
+    if liquidity >= 25_000 and volume >= 10_000:
+        score += 5
+
     score = max(0, min(score, 100))
 
     confidence = min(98, score + 2)

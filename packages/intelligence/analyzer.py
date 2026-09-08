@@ -23,7 +23,7 @@ from packages.intelligence.social_signals import (
 )
 
 from packages.intelligence.confidence import (
-    calculate_confidence,
+    compute_confidence,
 )
 
 from packages.intelligence.recommendation import (
@@ -76,9 +76,10 @@ def analyze_token(
         token
     )
 
-    from packages.intelligence.confidence import calculate_confidence
-
-    token["confidence"] = calculate_confidence(token)
+    # The confidence engine enriches the token in place and returns it.  Keep
+    # that object so downstream dashboard fields (``aie_score`` and
+    # ``recommendation``) remain available.
+    token = compute_confidence(token)
     # ----------------------------
     # Narrative
     # ----------------------------
@@ -107,9 +108,8 @@ def analyze_token(
     # Confidence
     # ----------------------------
 
-    token["confidence"] = calculate_confidence(
-        token
-    )
+    # ``aie_score`` is the final confidence score exposed to the UI.
+    token["confidence"] = token.get("aie_score", 0)
 
     # ----------------------------
     # Recommendation

@@ -21,15 +21,19 @@ def fetch_new_tokens():
         "meme_platform_enabled": "true"
     }
 
-    response = requests.get(
-        URL,
-        headers=headers,
-        params=params,
-        timeout=20
-    )
-
-    response.raise_for_status()
-
-    data = response.json()
+    try:
+        response = requests.get(
+            URL,
+            headers=headers,
+            params=params,
+            timeout=20
+        )
+        response.raise_for_status()
+        data = response.json()
+    except requests.RequestException as error:
+        # A live-data provider being temporarily unavailable must not take the
+        # dashboard down.  The UI can render an empty state and retry.
+        print(f"Birdeye new-listings request failed: {error}")
+        return []
 
     return data.get("data", {}).get("items", [])
